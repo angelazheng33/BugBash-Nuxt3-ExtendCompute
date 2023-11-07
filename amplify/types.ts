@@ -21,7 +21,7 @@ export interface AmplifyComputeConfig {
 
 
 export type AmplifyRouteTarget =
-  | { kind: "Static"; cacheControl: string; }
+  | { kind: "Static"; cacheControl?: string; }
   | { kind: "ImageOptimization" }
   | {
       kind: "Compute";
@@ -144,6 +144,8 @@ export interface AmplifyDeployManifest {
    * ```
    */
   computeResources?: AmplifyComputeConfig[];
+
+  // Framework Metadata
   framework: {
     name: string;
     version: string;

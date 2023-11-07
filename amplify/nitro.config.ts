@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import type { Nitro, NitroPreset } from "nitropack";
 import { resolve } from "node:path";
 import { writeFile } from "node:fs/promises";
-import { AmplifyComputeConfig, AmplifyDeployManifest, AmplifyRouteTarget } from "./types";
+import { AmplifyDeployManifest, AmplifyRouteTarget } from "./types";
 
 export default <NitroPreset>{
   extends: "node-server",
@@ -30,14 +30,21 @@ async function writeAmplifyFiles(nitro: Nitro) {
   const deployManifest: AmplifyDeployManifest = {
     version: 1,
     routes: [
-      ...nitro.options.publicAssets.map(asset => ({
-        path: `${(asset.baseURL || "").replace(/\/$/, '')}/*`,
-        target: {
-          cacheControl: 'public, max-age=31536000, immutable',
-          kind: "Static" as const
-        },
-        fallback: asset.fallthrough? computeTarget : undefined
-      })),
+      ...nitro.options.publicAssets.map(asset => {
+
+        if (asset.dir.includes('.nuxt/dist/client')) {
+          asset.baseURL = '/_nuxt'
+        }
+
+        return {
+          path: `${(asset.baseURL || "").replace(/\/$/, '')}/*`,
+          target: {
+            cacheControl: asset.maxAge > 0 ? `public, max-age=${asset.maxAge}, immutable` : undefined,
+            kind: "Static" as const
+          },
+          fallback: asset.fallthrough? computeTarget : undefined
+        }
+      })
     ],
     imageSettings: undefined,
     computeResources: [{
@@ -46,8 +53,10 @@ async function writeAmplifyFiles(nitro: Nitro) {
       runtime: "nodejs18.x",
     }],
     framework: {
-      name: 'nuxt',
-      version: '3.7.4'
+      // @ts-expect-error https://github.com/unjs/nitro/pull/1843
+      name: nitro.options.framework.name,
+      // @ts-expect-error
+      version: nitro.options.framework.version
     }
   };
   await writeFile(
