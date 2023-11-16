@@ -4,8 +4,8 @@ frontend:
     preBuild:
       commands:
         - nvm use 18
-        - npm i -g pnpm
-        - pnpm install
+        - corepack enable
+        - npx --yes nypm install
     build:
       commands:
         - pnpm run build

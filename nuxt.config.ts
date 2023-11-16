@@ -1,17 +1,40 @@
 import { defineNuxtConfig } from "nuxt/config";
 import { version as nuxtVersion } from 'nuxt/package.json'
+import { AWSAmplifyCustomConfig } from "./amplify/types";
 
-// https://nuxt.com/docs/api/configuration/nuxt-config
+declare module 'nitropack' {
+  interface NitroConfig {
+    awsAmplify?: AWSAmplifyCustomConfig
+  }
+}
+
 export default defineNuxtConfig({
+  app: {
+    // baseURL: '/base'
+  },
   nitro: {
-    preset: "./amplify",
-    // @ts-expect-error https://github.com/unjs/nitro/pull/1843 > Nuxt
+    // preset: provider === 'aws_amplify' ? "./amplify" : undefined,
+    preset:  "./amplify",
+    awsAmplify: {
+      imageOptimization: {
+        path: "/_nuxt/image",
+        cacheControl: "public, max-age=3600, immutable"
+      },
+      imageSettings: {
+          sizes: [100,200,300,500,640],
+          domains: [],
+          remotePatterns: [],
+          formats: ["image/jpeg", "image/png", "image/webp", "image/avif"],
+          minimumCacheTTL: 60,
+          dangerouslyAllowSVG: false
+      },
+    },
     framework: {
-      name: 'nitro',
+      name: 'nuxt',
       version: nuxtVersion
     }
   },
-  modules: ['@nuxt/content', '@nuxtjs/tailwindcss'],
+  modules: ["@nuxtjs/tailwindcss", "@nuxt/image", "@nuxt/content"],
   vue: {
     compilerOptions: {
       isCustomElement: (tag) => ['UseFetchDemo'].includes(tag),
@@ -28,4 +51,12 @@ export default defineNuxtConfig({
       theme: 'monokai',
     },
   },
+  image: {
+    provider: 'amplify',
+    providers: {
+      amplify: {
+        provider: '~/amplify/image-provider.ts',
+      }
+    }
+  }
 });

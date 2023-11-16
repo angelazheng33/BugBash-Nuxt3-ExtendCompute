@@ -22,7 +22,7 @@ export interface AmplifyComputeConfig {
 
 export type AmplifyRouteTarget =
   | { kind: "Static"; cacheControl?: string; }
-  | { kind: "ImageOptimization" }
+  | { kind: "ImageOptimization", cacheControl?: string; }
   | {
       kind: "Compute";
       /**
@@ -69,7 +69,7 @@ export type AmplifyImageSettings = {
    * Array of allowed external patterns that can use Image Optimization.
    * Similar to `domains` but provides more control with RegExp.
    */
-  remotePatterns?: {
+  remotePatterns: {
     /** The protocol of the allowed remote pattern. Can be `http` or `https`. */
     protocol?: "http" | "https";
     /**
@@ -95,7 +95,7 @@ export type AmplifyImageSettings = {
   )[];
 
   /** Cache duration (in seconds) for the optimized images. */
-  minumumCacheTTL?: number;
+  minimumCacheTTL?: number;
 
   /** Allow SVG input image URLs. This is disabled by default for security purposes. */
   dangerouslyAllowSVG?: boolean;
@@ -150,4 +150,12 @@ export interface AmplifyDeployManifest {
     name: string;
     version: string;
   }
+}
+
+export interface AWSAmplifyCustomConfig {
+  imageOptimization?: {
+    path?: string
+    cacheControl?: string
+  }
+  imageSettings?: AmplifyImageSettings
 }

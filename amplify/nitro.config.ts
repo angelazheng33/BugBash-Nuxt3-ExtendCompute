@@ -2,7 +2,8 @@ import { fileURLToPath } from "node:url";
 import type { Nitro, NitroPreset } from "nitropack";
 import { resolve } from "node:path";
 import { writeFile } from "node:fs/promises";
-import { AmplifyDeployManifest, AmplifyRouteTarget } from "./types";
+import { joinURL } from 'ufo'
+import { AmplifyDeployManifest, AmplifyRoute, AmplifyRouteTarget } from "./types";
 
 export default <NitroPreset>{
   extends: "node-server",
@@ -10,7 +11,7 @@ export default <NitroPreset>{
   output: {
     dir: "{{ rootDir }}/.amplify-hosting",
     serverDir: "{{ output.dir }}/compute/default",
-    publicDir: "{{ output.dir }}/static",
+    publicDir: "{{ output.dir }}/static{{ baseURL }}",
   },
   commands: {
     preview: "node ./compute/default/server.js",
@@ -25,38 +26,80 @@ export default <NitroPreset>{
 async function writeAmplifyFiles(nitro: Nitro) {
   const outDir = nitro.options.output.dir
 
-  // Write deploy-manifest.json
+
+  // Generate routes
+  const routes: AmplifyRoute[] = []
+
+  let hasWildcardPublicAsset = false
+
+    // @ts-expect-error
+    if (nitro.options.awsAmplify?.imageOptimization) {
+      // @ts-expect-error
+      const { path, cacheControl } = nitro.options.awsAmplify?.imageOptimization
+      routes.push({
+        path,
+        target: {
+          kind: "ImageOptimization",
+          cacheControl,
+        },
+      })
+    }
+
+
   const computeTarget = { kind: "Compute", src: "default" } as AmplifyRouteTarget
+
+  for (const publicAsset of nitro.options.publicAssets) {
+    if (!publicAsset.baseURL || publicAsset.baseURL === "/") {
+      hasWildcardPublicAsset = true
+      continue
+    }
+    routes.push({
+      path: `${publicAsset.baseURL!.replace(/\/$/, '')}/*`,
+      target: {
+        cacheControl: publicAsset.maxAge > 0 ? `public, max-age=${publicAsset.maxAge}, immutable` : undefined,
+        kind: "Static"
+      },
+      fallback: publicAsset.fallthrough ? computeTarget : undefined
+    })
+  }
+  if (hasWildcardPublicAsset) {
+    routes.push({
+      path: "/*.*",
+      target: {
+        kind: "Static"
+      },
+      fallback: computeTarget
+    })
+  }
+  routes.push({
+    path: '/*',
+    target: computeTarget,
+    fallback: hasWildcardPublicAsset ? {
+      kind: "Static"
+    } : undefined
+  })
+
+  // Prefix with baseURL
+  for (const route of routes) {
+    if (route.path !== "/*") {
+      route.path = joinURL(nitro.options.baseURL, route.path)
+    }
+  }
+
+  // Generate deploy-manifest.json
   const deployManifest: AmplifyDeployManifest = {
     version: 1,
-    routes: [
-      ...nitro.options.publicAssets.map(asset => {
-
-        if (asset.dir.includes('.nuxt/dist/client')) {
-          asset.baseURL = '/_nuxt'
-        }
-
-        return {
-          path: `${(asset.baseURL || "").replace(/\/$/, '')}/*`,
-          target: {
-            cacheControl: asset.maxAge > 0 ? `public, max-age=${asset.maxAge}, immutable` : undefined,
-            kind: "Static" as const
-          },
-          fallback: asset.fallthrough? computeTarget : undefined
-        }
-      })
-    ],
-    imageSettings: undefined,
+    routes,
+    // @ts-expect-error
+    imageSettings: nitro.options.awsAmplify?.imageSettings || undefined,
     computeResources: [{
       name: 'default',
       entrypoint: "server.js",
       runtime: "nodejs18.x",
     }],
     framework: {
-      // @ts-expect-error https://github.com/unjs/nitro/pull/1843
-      name: nitro.options.framework.name,
-      // @ts-expect-error
-      version: nitro.options.framework.version
+      name: nitro.options.framework.name || "nitro",
+      version: nitro.options.framework.version || "0.0.0"
     }
   };
   await writeFile(
