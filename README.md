@@ -8,6 +8,12 @@ Look at the [Nuxt 3 documentation](https://nuxt.com) to learn more.
 
 ## Supported Features
 
+
+
+
+
+
+
 - Server-Side Rendering (SSR)
 - Server Routes
 - Teleports
