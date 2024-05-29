@@ -13,6 +13,10 @@ Look at the [Nuxt 3 documentation](https://nuxt.com) to learn more.
 
 
 
+- BBOOO
+
+
+
 
 - Server-Side Rendering (SSR)
 - Server Routes
