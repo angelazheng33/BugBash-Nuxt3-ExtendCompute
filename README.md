@@ -4,6 +4,8 @@ This template is an open-source, customizable template built with Nuxt 3 and Tai
 
 Look at the [Nuxt 3 documentation](https://nuxt.com) to learn more.
 
+
+
 ## Supported Features
 
 - Server-Side Rendering (SSR)
