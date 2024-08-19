@@ -11,6 +11,6 @@ frontend:
       commands:
         - pnpm run build
   artifacts:
-    baseDirectory: dist
+    baseDirectory: .amplify-hosting
     files:
       - '**/*'
