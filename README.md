@@ -39,6 +39,3 @@ cd nuxt3-kitchen-sink
 pnpm i
 pnpm dev
 ```
-
-
-
