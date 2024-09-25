@@ -10,7 +10,7 @@ frontend:
         - mkdir -p kaushik
         - touch -a kaushik/original
         - ln -s ./kaushik/original ./kaushik/link
-        - ln -s ./kaushik/i-dont-exist ./kaushik/link
+        - ln -s ./kaushik/i-dont-exist ./kaushik/link2
     build:
       commands:
         - pnpm run build
