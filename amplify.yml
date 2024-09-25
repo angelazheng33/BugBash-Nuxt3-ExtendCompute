@@ -7,6 +7,9 @@ frontend:
         - nvm use 18
         - corepack enable
         - npx --yes nypm install
+        - mkdir kaushik
+        - touch kaushik/original
+        - ln -s ./kaushik/original ./kaushik/link
     build:
       commands:
         - pnpm run build
@@ -14,3 +17,6 @@ frontend:
     baseDirectory: .amplify-hosting
     files:
       - '**/*'
+  cache:
+    paths:
+      - ./kaushik
