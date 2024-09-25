@@ -7,8 +7,8 @@ frontend:
         - nvm use 18
         - corepack enable
         - npx --yes nypm install
-        - mkdir kaushik
-        - touch kaushik/original
+        - mkdir -p kaushik
+        - touch -a kaushik/original
         - ln -s ./kaushik/original ./kaushik/link
         - ln -s ./kaushik/i-dont-exist ./kaushik/link
     build:
