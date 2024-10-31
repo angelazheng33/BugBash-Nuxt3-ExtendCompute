@@ -3,6 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - mkdir ../../foo
         - echo $MY_VAR
         - nvm use 18
         - corepack enable
