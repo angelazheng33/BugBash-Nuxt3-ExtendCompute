@@ -3,15 +3,9 @@ frontend:
   phases:
     preBuild:
       commands:
-        - mkdir ../../foo
-        - echo $MY_VAR
         - nvm use 18
         - corepack enable
         - npx --yes nypm install
-        - mkdir -p kaushik
-        - touch -a kaushik/original
-        - ln -s ./kaushik/original ./kaushik/link
-        - ln -s ./kaushik/i-dont-exist ./kaushik/link2
     build:
       commands:
         - pnpm run build
@@ -19,6 +13,3 @@ frontend:
     baseDirectory: .amplify-hosting
     files:
       - '**/*'
-  cache:
-    paths:
-      - ./kaushik
