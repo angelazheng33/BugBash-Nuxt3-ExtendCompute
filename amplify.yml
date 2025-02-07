@@ -5,7 +5,9 @@ frontend:
       commands:
         - nvm use 18
         - corepack enable
-        - npx --yes nypm install
+        - npm -g i pnpm
+        - pnpm install --fix-lockfile 
+        ## - npx --yes nypm install --frozen-lockfile​
     build:
       commands:
         - pnpm run build
